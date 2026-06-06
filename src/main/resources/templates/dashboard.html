@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
@@ -67,6 +68,35 @@
             border-top:5px solid red;
         }
 
+        .form-container{
+            background:white;
+            padding:20px;
+            display:flex;
+            gap:10px;
+            justify-content:center;
+            flex-wrap:wrap;
+            box-shadow:0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .form-container input,
+        .form-container select{
+            padding:10px;
+            width:220px;
+        }
+
+        .form-container button{
+            padding:10px 20px;
+            background:#007bff;
+            color:white;
+            border:none;
+            border-radius:5px;
+            cursor:pointer;
+        }
+
+        .form-container button:hover{
+            background:#0056b3;
+        }
+
         table{
             width:100%;
             margin-top:15px;
@@ -103,7 +133,6 @@
 
     <h1>🚗 Smart Parking System Dashboard</h1>
 
-    <!-- Dashboard Cards -->
     <div class="card-container">
 
         <div class="card total">
@@ -123,11 +152,9 @@
 
     </div>
 
-    <!-- Parking Slots Table -->
     <h2>Parking Slots</h2>
 
     <table id="slotTable">
-
         <thead>
         <tr>
             <th>ID</th>
@@ -136,18 +163,35 @@
             <th>Vehicle</th>
         </tr>
         </thead>
-
-        <tbody>
-
-        </tbody>
-
+        <tbody></tbody>
     </table>
 
-    <!-- Vehicles Table -->
+    <h2>Add Vehicle</h2>
+
+    <div class="form-container">
+
+        <input type="text"
+               id="vehicleNumber"
+               placeholder="Vehicle Number">
+
+        <input type="text"
+               id="ownerName"
+               placeholder="Owner Name">
+
+        <select id="vehicleType">
+            <option value="CAR">CAR</option>
+            <option value="BIKE">BIKE</option>
+        </select>
+
+        <button onclick="addVehicle()">
+            Add Vehicle
+        </button>
+
+    </div>
+
     <h2>Vehicles</h2>
 
     <table id="vehicleTable">
-
         <thead>
         <tr>
             <th>ID</th>
@@ -156,46 +200,31 @@
             <th>Vehicle Type</th>
         </tr>
         </thead>
-
-        <tbody>
-
-        </tbody>
-
+        <tbody></tbody>
     </table>
 
 </div>
 
 <script>
 
-    // Dashboard Summary
     fetch('/dashboard/summary')
     .then(response => response.json())
     .then(data => {
 
-        document.getElementById('totalSlots').innerText =
-            data.totalSlots;
-
-        document.getElementById('availableSlots').innerText =
-            data.availableSlots;
-
-        document.getElementById('occupiedSlots').innerText =
-            data.occupiedSlots;
+        document.getElementById('totalSlots').innerText = data.totalSlots;
+        document.getElementById('availableSlots').innerText = data.availableSlots;
+        document.getElementById('occupiedSlots').innerText = data.occupiedSlots;
     });
 
-    // Parking Slots
     fetch('/slots')
     .then(response => response.json())
     .then(slots => {
 
-        const tbody =
-            document.querySelector('#slotTable tbody');
-
-        tbody.innerHTML = "";
+        const tbody = document.querySelector('#slotTable tbody');
 
         slots.forEach(slot => {
 
-            let row =
-                document.createElement('tr');
+            let row = document.createElement('tr');
 
             let statusClass =
                 slot.status === 'AVAILABLE'
@@ -216,26 +245,17 @@
             tbody.appendChild(row);
         });
 
-    })
-    .catch(error => {
-        console.error(error);
     });
 
-
-    // Vehicles
     fetch('/vehicles')
     .then(response => response.json())
     .then(vehicles => {
 
-        const tbody =
-            document.querySelector('#vehicleTable tbody');
-
-        tbody.innerHTML = "";
+        const tbody = document.querySelector('#vehicleTable tbody');
 
         vehicles.forEach(vehicle => {
 
-            let row =
-                document.createElement('tr');
+            let row = document.createElement('tr');
 
             row.innerHTML = `
                 <td>${vehicle.id}</td>
@@ -247,12 +267,52 @@
             tbody.appendChild(row);
         });
 
-    })
-    .catch(error => {
-        console.error(error);
     });
+
+    function addVehicle() {
+
+        const vehicleNumber =
+            document.getElementById("vehicleNumber").value;
+
+        const ownerName =
+            document.getElementById("ownerName").value;
+
+        const vehicleType =
+            document.getElementById("vehicleType").value;
+
+        fetch('/vehicles', {
+
+            method: 'POST',
+
+            headers: {
+                'Content-Type': 'application/json'
+            },
+
+            body: JSON.stringify({
+                vehicleNumber: vehicleNumber,
+                ownerName: ownerName,
+                vehicleType: vehicleType
+            })
+
+        })
+        .then(response => response.json())
+        .then(data => {
+
+            alert("Vehicle Added Successfully!");
+
+            location.reload();
+
+        })
+        .catch(error => {
+
+            console.error(error);
+            alert("Error Adding Vehicle");
+
+        });
+    }
 
 </script>
 
 </body>
 </html>
+```
