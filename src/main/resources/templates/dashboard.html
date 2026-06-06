@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Smart Parking System</title>
+
+    <style>
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+            font-family:Arial,sans-serif;
+        }
+
+        body{
+            background:#f4f6f9;
+        }
+
+        .container{
+            width:90%;
+            margin:40px auto;
+        }
+
+        h1{
+            text-align:center;
+            margin-bottom:40px;
+            color:#333;
+        }
+
+        .card-container{
+            display:flex;
+            gap:20px;
+            justify-content:center;
+            flex-wrap:wrap;
+        }
+
+        .card{
+            width:250px;
+            background:white;
+            padding:25px;
+            border-radius:10px;
+            box-shadow:0 2px 10px rgba(0,0,0,0.1);
+            text-align:center;
+        }
+
+        .card p{
+            font-size:35px;
+            margin-top:10px;
+            font-weight:bold;
+        }
+
+        .available{
+            border-top:5px solid green;
+        }
+
+        .occupied{
+            border-top:5px solid red;
+        }
+
+        .total{
+            border-top:5px solid blue;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <h1>🚗 Smart Parking System Dashboard</h1>
+
+    <div class="card-container">
+
+        <div class="card total">
+            <h2>Total Slots</h2>
+            <p id="totalSlots">0</p>
+        </div>
+
+        <div class="card available">
+            <h2>Available Slots</h2>
+            <p id="availableSlots">0</p>
+        </div>
+
+        <div class="card occupied">
+            <h2>Occupied Slots</h2>
+            <p id="occupiedSlots">0</p>
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+    fetch('/dashboard/summary')
+    .then(response => response.json())
+    .then(data => {
+
+        document.getElementById('totalSlots').innerText =
+            data.totalSlots;
+
+        document.getElementById('availableSlots').innerText =
+            data.availableSlots;
+
+        document.getElementById('occupiedSlots').innerText =
+            data.occupiedSlots;
+
+    })
+    .catch(error => {
+        console.log(error);
+    });
+</script>
+
+</body>
+</html>
