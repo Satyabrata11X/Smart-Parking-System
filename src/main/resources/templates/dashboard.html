@@ -26,6 +26,13 @@
             color:#333;
         }
 
+        h2{
+            text-align:center;
+            margin-top:40px;
+            margin-bottom:20px;
+            color:#333;
+        }
+
         .card-container{
             display:flex;
             justify-content:center;
@@ -60,14 +67,9 @@
             border-top:5px solid red;
         }
 
-        h2{
-            text-align:center;
-            margin-top:40px;
-            margin-bottom:20px;
-        }
-
         table{
             width:100%;
+            margin-top:15px;
             background:white;
             border-collapse:collapse;
             box-shadow:0 2px 10px rgba(0,0,0,0.1);
@@ -101,6 +103,7 @@
 
     <h1>🚗 Smart Parking System Dashboard</h1>
 
+    <!-- Dashboard Cards -->
     <div class="card-container">
 
         <div class="card total">
@@ -120,6 +123,7 @@
 
     </div>
 
+    <!-- Parking Slots Table -->
     <h2>Parking Slots</h2>
 
     <table id="slotTable">
@@ -129,6 +133,27 @@
             <th>ID</th>
             <th>Slot Number</th>
             <th>Status</th>
+            <th>Vehicle</th>
+        </tr>
+        </thead>
+
+        <tbody>
+
+        </tbody>
+
+    </table>
+
+    <!-- Vehicles Table -->
+    <h2>Vehicles</h2>
+
+    <table id="vehicleTable">
+
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Vehicle Number</th>
+            <th>Owner Name</th>
+            <th>Vehicle Type</th>
         </tr>
         </thead>
 
@@ -142,6 +167,7 @@
 
 <script>
 
+    // Dashboard Summary
     fetch('/dashboard/summary')
     .then(response => response.json())
     .then(data => {
@@ -156,7 +182,7 @@
             data.occupiedSlots;
     });
 
-
+    // Parking Slots
     fetch('/slots')
     .then(response => response.json())
     .then(slots => {
@@ -182,6 +208,40 @@
                 <td class="${statusClass}">
                     ${slot.status}
                 </td>
+                <td>
+                    ${slot.vehicle ? slot.vehicle.vehicleNumber : 'Empty'}
+                </td>
+            `;
+
+            tbody.appendChild(row);
+        });
+
+    })
+    .catch(error => {
+        console.error(error);
+    });
+
+
+    // Vehicles
+    fetch('/vehicles')
+    .then(response => response.json())
+    .then(vehicles => {
+
+        const tbody =
+            document.querySelector('#vehicleTable tbody');
+
+        tbody.innerHTML = "";
+
+        vehicles.forEach(vehicle => {
+
+            let row =
+                document.createElement('tr');
+
+            row.innerHTML = `
+                <td>${vehicle.id}</td>
+                <td>${vehicle.vehicleNumber}</td>
+                <td>${vehicle.ownerName}</td>
+                <td>${vehicle.vehicleType}</td>
             `;
 
             tbody.appendChild(row);
