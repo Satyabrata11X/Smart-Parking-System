@@ -28,8 +28,8 @@
 
         .card-container{
             display:flex;
-            gap:20px;
             justify-content:center;
+            gap:20px;
             flex-wrap:wrap;
         }
 
@@ -48,6 +48,10 @@
             font-weight:bold;
         }
 
+        .total{
+            border-top:5px solid blue;
+        }
+
         .available{
             border-top:5px solid green;
         }
@@ -56,8 +60,38 @@
             border-top:5px solid red;
         }
 
-        .total{
-            border-top:5px solid blue;
+        h2{
+            text-align:center;
+            margin-top:40px;
+            margin-bottom:20px;
+        }
+
+        table{
+            width:100%;
+            background:white;
+            border-collapse:collapse;
+            box-shadow:0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        th{
+            background:#333;
+            color:white;
+        }
+
+        th,td{
+            border:1px solid #ddd;
+            padding:12px;
+            text-align:center;
+        }
+
+        .available-status{
+            color:green;
+            font-weight:bold;
+        }
+
+        .occupied-status{
+            color:red;
+            font-weight:bold;
         }
     </style>
 </head>
@@ -86,9 +120,28 @@
 
     </div>
 
+    <h2>Parking Slots</h2>
+
+    <table id="slotTable">
+
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Slot Number</th>
+            <th>Status</th>
+        </tr>
+        </thead>
+
+        <tbody>
+
+        </tbody>
+
+    </table>
+
 </div>
 
 <script>
+
     fetch('/dashboard/summary')
     .then(response => response.json())
     .then(data => {
@@ -101,11 +154,44 @@
 
         document.getElementById('occupiedSlots').innerText =
             data.occupiedSlots;
+    });
+
+
+    fetch('/slots')
+    .then(response => response.json())
+    .then(slots => {
+
+        const tbody =
+            document.querySelector('#slotTable tbody');
+
+        tbody.innerHTML = "";
+
+        slots.forEach(slot => {
+
+            let row =
+                document.createElement('tr');
+
+            let statusClass =
+                slot.status === 'AVAILABLE'
+                ? 'available-status'
+                : 'occupied-status';
+
+            row.innerHTML = `
+                <td>${slot.id}</td>
+                <td>${slot.slotNumber}</td>
+                <td class="${statusClass}">
+                    ${slot.status}
+                </td>
+            `;
+
+            tbody.appendChild(row);
+        });
 
     })
     .catch(error => {
-        console.log(error);
+        console.error(error);
     });
+
 </script>
 
 </body>
