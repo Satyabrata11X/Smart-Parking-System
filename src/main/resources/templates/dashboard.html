@@ -189,6 +189,24 @@
 
     </div>
 
+    <h2>Assign Vehicle to Slot</h2>
+
+    <div class="form-container">
+
+        <input type="number"
+               id="slotId"
+               placeholder="Slot ID">
+
+        <input type="number"
+               id="assignVehicleId"
+               placeholder="Vehicle ID">
+
+        <button onclick="assignVehicle()">
+            Assign Vehicle
+        </button>
+
+    </div>
+
     <h2>Vehicles</h2>
 
     <table id="vehicleTable">
@@ -211,20 +229,27 @@
     .then(response => response.json())
     .then(data => {
 
-        document.getElementById('totalSlots').innerText = data.totalSlots;
-        document.getElementById('availableSlots').innerText = data.availableSlots;
-        document.getElementById('occupiedSlots').innerText = data.occupiedSlots;
+        document.getElementById('totalSlots').innerText =
+            data.totalSlots;
+
+        document.getElementById('availableSlots').innerText =
+            data.availableSlots;
+
+        document.getElementById('occupiedSlots').innerText =
+            data.occupiedSlots;
     });
 
     fetch('/slots')
     .then(response => response.json())
     .then(slots => {
 
-        const tbody = document.querySelector('#slotTable tbody');
+        const tbody =
+            document.querySelector('#slotTable tbody');
 
         slots.forEach(slot => {
 
-            let row = document.createElement('tr');
+            let row =
+                document.createElement('tr');
 
             let statusClass =
                 slot.status === 'AVAILABLE'
@@ -251,11 +276,13 @@
     .then(response => response.json())
     .then(vehicles => {
 
-        const tbody = document.querySelector('#vehicleTable tbody');
+        const tbody =
+            document.querySelector('#vehicleTable tbody');
 
         vehicles.forEach(vehicle => {
 
-            let row = document.createElement('tr');
+            let row =
+                document.createElement('tr');
 
             row.innerHTML = `
                 <td>${vehicle.id}</td>
@@ -295,18 +322,64 @@
             })
 
         })
+
         .then(response => response.json())
+
         .then(data => {
 
             alert("Vehicle Added Successfully!");
-
             location.reload();
 
         })
+
         .catch(error => {
 
             console.error(error);
             alert("Error Adding Vehicle");
+
+        });
+    }
+
+    function assignVehicle() {
+
+        const slotId =
+            document.getElementById("slotId").value;
+
+        const vehicleId =
+            document.getElementById("assignVehicleId").value;
+
+        if(!slotId || !vehicleId){
+
+            alert("Please enter Slot ID and Vehicle ID");
+            return;
+        }
+
+        fetch(`/slots/${slotId}/assign/${vehicleId}`, {
+
+            method: 'POST'
+
+        })
+
+        .then(response => {
+
+            if(!response.ok){
+                throw new Error("Assignment failed");
+            }
+
+            return response.json();
+        })
+
+        .then(data => {
+
+            alert("Vehicle Assigned Successfully!");
+            location.reload();
+
+        })
+
+        .catch(error => {
+
+            console.error(error);
+            alert("Error Assigning Vehicle");
 
         });
     }
