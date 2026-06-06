@@ -1,4 +1,4 @@
-```html
+
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
@@ -161,6 +161,7 @@
             <th>Slot Number</th>
             <th>Status</th>
             <th>Vehicle</th>
+            <th>Action</th>
         </tr>
         </thead>
         <tbody></tbody>
@@ -224,8 +225,9 @@
 </div>
 
 <script>
+// Dashboard Summary
 
-    fetch('/dashboard/summary')
+fetch('/dashboard/summary')
     .then(response => response.json())
     .then(data => {
 
@@ -239,31 +241,44 @@
             data.occupiedSlots;
     });
 
-    fetch('/slots')
+
+
+// Parking Slots
+
+fetch('/slots')
     .then(response => response.json())
     .then(slots => {
 
         const tbody =
             document.querySelector('#slotTable tbody');
 
-        slots.forEach(slot => {
+        tbody.innerHTML = "";
+
+        slots.forEach((slot, index) => {
 
             let row =
                 document.createElement('tr');
 
             let statusClass =
                 slot.status === 'AVAILABLE'
-                ? 'available-status'
-                : 'occupied-status';
+                    ? 'available-status'
+                    : 'occupied-status';
 
             row.innerHTML = `
-                <td>${slot.id}</td>
+                <td>${index + 1}</td>
                 <td>${slot.slotNumber}</td>
                 <td class="${statusClass}">
                     ${slot.status}
                 </td>
                 <td>
                     ${slot.vehicle ? slot.vehicle.vehicleNumber : 'Empty'}
+                </td>
+                <td>
+                    ${
+                        slot.status === 'OCCUPIED'
+                        ? `<button onclick="releaseSlot(${slot.id})">Release</button>`
+                        : '-'
+                    }
                 </td>
             `;
 
@@ -272,20 +287,28 @@
 
     });
 
-    fetch('/vehicles')
+
+
+
+
+// Vehicles
+
+fetch('/vehicles')
     .then(response => response.json())
     .then(vehicles => {
 
         const tbody =
             document.querySelector('#vehicleTable tbody');
 
-        vehicles.forEach(vehicle => {
+        tbody.innerHTML = "";
+
+        vehicles.forEach((vehicle, index) => {
 
             let row =
                 document.createElement('tr');
 
             row.innerHTML = `
-                <td>${vehicle.id}</td>
+                <td>${index + 1}</td>
                 <td>${vehicle.vehicleNumber}</td>
                 <td>${vehicle.ownerName}</td>
                 <td>${vehicle.vehicleType}</td>
@@ -294,98 +317,151 @@
             tbody.appendChild(row);
         });
 
+    })
+    .catch(error => {
+
+        console.error(error);
+
     });
 
-    function addVehicle() {
 
-        const vehicleNumber =
-            document.getElementById("vehicleNumber").value;
+// Add Vehicle
 
-        const ownerName =
-            document.getElementById("ownerName").value;
+function addVehicle() {
 
-        const vehicleType =
-            document.getElementById("vehicleType").value;
+    const vehicleNumber =
+        document.getElementById("vehicleNumber").value;
 
-        fetch('/vehicles', {
+    const ownerName =
+        document.getElementById("ownerName").value;
 
-            method: 'POST',
+    const vehicleType =
+        document.getElementById("vehicleType").value;
 
-            headers: {
-                'Content-Type': 'application/json'
-            },
+    if (!vehicleNumber || !ownerName) {
 
-            body: JSON.stringify({
-                vehicleNumber: vehicleNumber,
-                ownerName: ownerName,
-                vehicleType: vehicleType
-            })
-
-        })
-
-        .then(response => response.json())
-
-        .then(data => {
-
-            alert("Vehicle Added Successfully!");
-            location.reload();
-
-        })
-
-        .catch(error => {
-
-            console.error(error);
-            alert("Error Adding Vehicle");
-
-        });
+        alert("Please fill all fields");
+        return;
     }
 
-    function assignVehicle() {
+    fetch('/vehicles', {
 
-        const slotId =
-            document.getElementById("slotId").value;
+        method: 'POST',
 
-        const vehicleId =
-            document.getElementById("assignVehicleId").value;
+        headers: {
+            'Content-Type': 'application/json'
+        },
 
-        if(!slotId || !vehicleId){
+        body: JSON.stringify({
+            vehicleNumber: vehicleNumber,
+            ownerName: ownerName,
+            vehicleType: vehicleType
+        })
 
-            alert("Please enter Slot ID and Vehicle ID");
-            return;
+    })
+
+    .then(response => response.json())
+
+    .then(data => {
+
+        alert("Vehicle Added Successfully!");
+        location.reload();
+
+    })
+
+    .catch(error => {
+
+        console.error(error);
+        alert("Error Adding Vehicle");
+
+    });
+}
+
+
+// Assign Vehicle
+
+function assignVehicle() {
+
+    const slotId =
+        document.getElementById("slotId").value;
+
+    const vehicleId =
+        document.getElementById("assignVehicleId").value;
+
+    if (!slotId || !vehicleId) {
+
+        alert("Please enter Slot ID and Vehicle ID");
+        return;
+    }
+
+    fetch(`/slots/${slotId}/assign/${vehicleId}`, {
+
+        method: 'POST'
+
+    })
+
+    .then(response => {
+
+        if (!response.ok) {
+            throw new Error("Assignment failed");
         }
 
-        fetch(`/slots/${slotId}/assign/${vehicleId}`, {
+        return response.json();
+    })
 
-            method: 'POST'
+    .then(data => {
 
-        })
+        alert("Vehicle Assigned Successfully!");
+        location.reload();
 
-        .then(response => {
+    })
 
-            if(!response.ok){
-                throw new Error("Assignment failed");
-            }
+    .catch(error => {
 
-            return response.json();
-        })
+        console.error(error);
+        alert("Error Assigning Vehicle");
 
-        .then(data => {
+    });
+}
 
-            alert("Vehicle Assigned Successfully!");
-            location.reload();
 
-        })
+// Release Slot
 
-        .catch(error => {
+function releaseSlot(slotId) {
 
-            console.error(error);
-            alert("Error Assigning Vehicle");
+    fetch(`/slots/${slotId}/release`, {
 
-        });
-    }
+        method: 'POST'
+
+    })
+
+    .then(response => {
+
+        if (!response.ok) {
+            throw new Error("Release failed");
+        }
+
+        return response.json();
+    })
+
+    .then(data => {
+
+        alert("Slot Released Successfully!");
+        location.reload();
+
+    })
+
+    .catch(error => {
+
+        console.error(error);
+        alert("Error Releasing Slot");
+
+    });
+}
+
 
 </script>
 
 </body>
 </html>
-```
+
