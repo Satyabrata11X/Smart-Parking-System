@@ -27,7 +27,7 @@ public class ParkingSlotService {
     }
 
     public List<ParkingSlot> getAllSlots() {
-        return parkingSlotRepository.findAll();
+        return parkingSlotRepository.findAllByOrderByIdAsc();
     }
 
     public ParkingSlot getSlotById(Long id) {
